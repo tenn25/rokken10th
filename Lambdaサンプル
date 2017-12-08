@@ -1,0 +1,326 @@
+
+
+
+curl -H "Content-Type: application/json" -X POST -d '{
+  "events": [
+    {
+      "replyToken": "872bc8cb1fdfaef728041ed95d52628e",
+      "type": "message",
+      "timestamp": 1462629479859,
+      "source": {
+        "type": "user",
+        "userId": "Ub78c01729a54800249acd16a8aa7d46c"
+      },
+      "message": {
+        "id": "325708",
+        "type": "text",
+        "text": "Hello, world"
+      }
+    }
+  ]
+}' https://tenn25.com/KameBot
+
+
+curl -X POST \
+-H 'Content-Type:application/json' \
+-H 'Authorization: Bearer 19fc9cffd88c4bf49ff00b951d010107' \
+-d '{
+    "to": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "messages":[
+        {
+            "type":"text",
+            "text":"Hello, world1"
+        },
+        {
+            "type":"text",
+            "text":"Hello, world2"
+        }
+    ]
+}' https://api.line.me/v2/bot/message/push
+
+curl -X POST \
+-H 'Content-Type:application/json' \
+-H 'Authorization: Bearer uWsPyFq//FLT3ahl6LsUlooCztg3pEmuItwizfyIrB9p8Ke98l4RkjLpA80ONWfx7MmHA55OzSmdnXr1K6mp122bo2lE0TqTgmhpNysDzIjLHMDm7JwFPdKU7ovLtYQjvLlZXND4kQ/8RoxGRC25nQdB04t89/1O/w1cDnyilFU=' \
+-d '{
+    "replyToken":"4ab11ff68ab34354a48bb439b602f027",
+    "messages":[
+        {
+            "type":"text",
+            "text":"Hello, user"
+        },
+        {
+            "type":"text",
+            "text":"May I help you?"
+        }
+    ]
+}' https://api.line.me/v2/bot/message/reply
+
+
+
+
+curl -X POST \
+-H 'Content-Type:application/x-www-form-urlencoded' \
+-d '{
+"grant_type":"client_credentials",
+"client_id":"1534382371",
+"client_secret":"872bc8cb1fdfaef728041ed95d52628e"
+}' https://api.line.me/v2/oauth/accessToken
+
+--------------------------------------------push curlから
+curl -X POST -H 'Content-Type:application/json' -H 'Authorization: Bearer YmURr5Ano24fpNS/KIAe/eGJ0B0KyMs+B0XaAtcY7IPI4Ptf/8GaOstIsr+E4Q6U7MmHA55OzSmdnXr1K6mp122bo2lE0TqTgmhpNysDzIjHQzIyhRS7Iq+2q+iBffnCsqM1s4sfPmHit7UC44SvAgdB04t89/1O/w1cDnyilFU=' -d '{  "to": "C86f1326cc4c8781e3f394c5a374cbfa4", "messages":[{"type":"text","text":"お疲れ様ー！"}]}' https://api.line.me/v2/bot/message/push
+
+
+
+--------------------------------------------pushをnode.jsから
+var https = require('https');
+exports.handler = (event, context, callback) => {
+
+    var data = JSON.stringify({
+       "to": "C86f1326cc4c8781e3f394c5a374cbfa4",
+       "messages": [
+         {
+           "type": "text",
+           "text": "たくさんお話するよ"
+         }
+       ]
+    });
+    opts = {
+        hostname: 'api.line.me',
+        path: '/v2/bot/message/push',
+        headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            "Content-Length": Buffer.byteLength(data),
+            "Authorization": "Bearer " + process.env.CHANNEL_ACCESS_TOKEN
+        },
+        method: 'POST',
+    };
+
+    var req = https.request(opts, function(res) {
+        res.on('data', function(res) {
+            console.log(res.toString());
+        }).on('error', function(e) {
+            console.log('ERROR: ' + e.stack);
+        });
+    });
+    req.write(data);
+    req.end();
+};
+
+
+-----------------------------------------------accessTokenの有効期限切れを確認
+https://developers.line.me/ja/docs/social-api/managing-access-tokens-v2/
+
+
+
+//アクセストークンを検証する v2.0の場合
+$ curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'access_token=Wv2v/mKC8aSsuHHxrvo98pamEPOo2EhKbFFuNsZxd3yXDWux6G8NgxCDi/QwYpZe7MmHA55OzSmdnXr1K6mp122bo2lE0TqTgmhpNysDzIizTM9Yub/e/YizKxipLV21dUs3fEnx1/l5D+wMOot54AdB04t89/1O/w1cDnyilFU=' https://api.line.me/v2/oauth/verify
+//有効期限内の場合のレスポンス
+{
+  "scope":"P",
+  "client_id":"1534382371",
+  "expires_in":3153591913
+}
+
+期限切れの場合のレスポンス
+{
+    "error": "invalid_request",
+    "error_description": "access_token invalid"
+}
+
+//アクセストークンを更新 v2.0の場合
+$ curl -X POST \
+-H 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'grant_type=refresh_token' \
+--data-urlencode 'client_id=1534382371' \
+--data-urlencode 'client_secret=872bc8cb1fdfaef728041ed95d52628e' \
+--data-urlencode 'refresh_token=testtesttest' \
+https://api.line.me/v2/oauth/accessToken
+
+※コンソール画面からトークン発行したから
+初回のリフレッシュトークンがわからん！！
+
+
+
+v2.1の場合
+curl -X GET 'https://api.line.me/oauth2/v2.1/verify?access_token=YmURr5Ano24fpNS/KIAe/eGJ0B0KyMs+B0XaAtcY7IPI4Ptf/8GaOstIsr+E4Q6U7MmHA55OzSmdnXr1K6mp122bo2lE0TqTgmhpNysDzIjHQzIyhRS7Iq+2q+iBffnCsqM1s4sfPmHit7UC44SvAgdB04t89/1O/w1cDnyilFU='
+
+------------------------------------------------
+$ curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'access_token=YmURr5Ano24fpNS/KIAe/eGJ0B0KyMs+B0XaAtcY7IPI4Ptf/8GaOstIsr+E4Q6U7MmHA55OzSmdnXr1K6mp122bo2lE0TqTgmhpNysDzIjHQzIyhRS7Iq+2q+iBffnCsqM1s4sfPmHit7UC44SvAgdB04t89/1O/w1cDnyilFU=' POST https://api.line.me/oauth2/v2.1/token
+
+------------------------------------------------
+curl -X POST https://api.line.me/oauth2/v2.1/token \
+-H 'Content-Type: application/x-www-form-urlencoded' \
+-d 'grant_type=authorization_code' \
+-d 'code=200' \
+-d 'redirect_uri=https://tenn25.com:443/KameBot' \
+-d 'client_id=1534382371' \
+-d 'client_secret=872bc8cb1fdfaef728041ed95d52628e'
+
+------------------------------------------------
+
+curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' -d 'grant_type=authorization_code' -d 'code=200' -d 'redirect_uri=https://tenn25.com:443/KameBot' -d 'client_id=1534382371' -d 'client_secret=872bc8cb1fdfaef728041ed95d52628e' https://api.line.me/oauth2/v2.1/token
+
+
+————————————————————————
+
+curl -X POST \
+-H 'Content-Type:application/json' \
+-H 'Authorization: Bearer /byh3Vwk+rQHGdzx/6jrnjJVN5xWq3xoRylGfS3+PWeRMj2Py3REAeYMKAW0D1XGaX7APVXW/LkZmq/VOaOlxeJQ3gpOtEyKtnQSDCLDuNJIZfWD6u4dFKzImaiW8mQx7TPgdOsBU9WT0wsAqHI6sAdB04t89/1O/w1cDnyilFU=' \
+-d '{
+    "to": "U3695b3f66c5b0eee1dfbe8f74fa54d3d",
+    "messages":[
+{
+    "type": "image",
+    "originalContentUrl": "https://s3-ap-northeast-1.amazonaws.com/rokken10th/U3695b3f66c5b0eee1dfbe8f74fa54d3d/1511711532077.jpg",
+    "previewImageUrl": "https://s3-ap-northeast-1.amazonaws.com/rokken10th/U3695b3f66c5b0eee1dfbe8f74fa54d3d/1511711532077.jpg"
+}
+    ]
+}' https://api.line.me/v2/bot/message/push
+
+
+—————————————————
+
+curl -X POST -H 'Content-Type:application/json' -H 'Authorization: Bearer /byh3Vwk+rQHGdzx/6jrnjJVN5xWq3xoRylGfS3+PWeRMj2Py3REAeYMKAW0D1XGaX7APVXW/LkZmq/VOaOlxeJQ3gpOtEyKtnQSDCLDuNJIZfWD6u4dFKzImaiW8mQx7TPgdOsBU9WT0wsAqHI6sAdB04t89/1O/w1cDnyilFU=' https://api.line.me/v2/bot/room/Ref94dea5ab6d861e5a62274bc4b5a9ad/leave
+
+————————————
+
+AWS_S3_REGION
+ap-northeast-1
+
+AWS_S3_ACCESS_KEY_ID
+AKIAJGR6OYGUJCQ4OZJA
+
+AWS_S3_SECRET_ACCESS_KEY
+374CDnXrxTPJPiJ8DyBk4HLc97/xRe3IrnBOuNcg
+
+CHANNEL_ACCESS_TOKEN
+/byh3Vwk+rQHGdzx/6jrnjJVN5xWq3xoRylGfS3+PWeRMj2Py3REAeYMKAW0D1XGaX7APVXW/LkZmq/VOaOlxeJQ3gpOtEyKtnQSDCLDuNJIZfWD6u4dFKzImaiW8mQx7TPgdOsBU9WT0wsAqHI6sAdB04t89/1O/w1cDnyilFU=
+
+ーーーーーーーーーーーーーーーーーーーーー
+
+{ type: 'message',
+replyToken: 'f875776b7d204ae1b91ed14b8a289fcd',
+source: { 
+	userId: 'U3695b3f66c5b0eee1dfbe8f74fa54d3d',
+	 type: 'user'
+ },
+timestamp: 1511971480015,
+message: { 
+	type: 'image',
+	 id: '7065984449848' } 
+}
+
+ーーーーーーーーーーーーーーーーーーーーー
+{ type: 'message',
+replyToken: '94c51440b634463995cfe86a7fb9888d',
+source: {
+	 userId: 'U3695b3f66c5b0eee1dfbe8f74fa54d3d',
+	 type: 'user'
+ },
+timestamp: 1511971741803,
+message: {
+	 type: 'text',
+	 id: '7065998470594',
+	 text: 'てst' }
+}
+
+———————————————————
+1
+Channel ID
+1543251849
+
+Channel Secret
+273c5ac54420ec04fd1cbd587583df4e
+
+
+/byh3Vwk+rQHGdzx/6jrnjJVN5xWq3xoRylGfS3+PWeRMj2Py3REAeYMKAW0D1XGaX7APVXW/LkZmq/VOaOlxeJQ3gpOtEyKtnQSDCLDuNJIZfWD6u4dFKzImaiW8mQx7TPgdOsBU9WT0wsAqHI6sAdB04t89/1O/w1cDnyilFU=
+
+2
+Channel ID
+1549257332
+
+Channel Secret
+0243c88fa344bc0057908bfc744c1a5a
+
++fZq72gId0X1qvN9+NAOi/wzWp0pXcgt7ZXR+rxLSn36Yb2/GNjqxSNyMc1dZa9iZFg4ZtElh5iRBFu/Pm6nOIKps4xLGQejsJTDmZ4eHrBywie9tAT4Psi5cLcwMftplxu22arL6yIkCNJmje10eQdB04t89/1O/w1cDnyilFU=
+
+3
+Channel ID
+1549266055
+
+Channel Secret
+a4db78f5de05ec30e251e71145d2573c
+
+i8QNNis69E0k41R5o3LKDBCDPA63sK1gRWDLmLoCXtmlX9QrrpvCZ+lbtF+4GRTgEwCf1iCxg31fdVhyKExvSFq167cDpLwj5cZu1oFqKl0nOqIwQbTKjWBbuPrtDHamo7Ct5FmIiR435I2p23lUWAdB04t89/1O/w1cDnyilFU=
+
+4
+Channel ID
+1549267038
+
+Channel Secret
+f1b171c84c9c96e5f6f891f8fddbf898
+
+McLxNSWDk8RnCwxpd1CTd9rqL9EbXE22fc59FdFzWYzGTqB76IDXth/y5bMyE2m5fC9sMFN/E8X5Zg+fuVWa/eKs4M1XPLWiQaHPQCfJ1/ZdWZPKzb8TOWeHuXyv7oePHmRueg67a4YEghFWLYhtJAdB04t89/1O/w1cDnyilFU=
+
+
+5
+Channel ID
+1549267893
+
+Channel Secret
+f91ab98fb0ae842c457bfbed391f5589
+
+hqB0i8u7hIhGgkzqoRApPCgBug1Z8FMtvhnnooqH6OTUhQPE8pOlYvtFKqjkTexsg6WKW02pUBsdvcg0NxmGYjYkljEvOX7PcYg52QG0CcZdPhnleZn+wlQGaUsvtVByQMOnZe6yqD9kIJO3lr6C5wdB04t89/1O/w1cDnyilFU=
+
+6
+Channel ID
+1549267787
+
+Channel Secret
+52ab733f1ee0523cd18d6ee189acaa60
+
+oHz+GemMfdCOoTKV8xLaqvTsYgNHCCsGFnxbvuA82sKmKWDOJBbJ5etMaN0RcGJPgmxk/BzFWuxI22CBT4O7u5rWQm+mHMn2sdgbJ8vZcKI9dPGl1FiFWpMxJaUwoSPecXJzFoDwftuMR3UMDrSW8QdB04t89/1O/w1cDnyilFU=
+
+
+
+
+————————————
+
+AWS_S3_REGION
+ap-northeast-1
+
+AWS_S3_ACCESS_KEY_ID
+AKIAJGR6OYGUJCQ4OZJA
+
+AWS_S3_SECRET_ACCESS_KEY
+374CDnXrxTPJPiJ8DyBk4HLc97/xRe3IrnBOuNcg
+
+CHANNEL_ACCESS_TOKEN
+*******
+
+—————————
+rokken10th-addframe
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowPublicRead",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::rokken10th-addframe/*"
+        }
+    ]
+}
+
+
+ーーーーーーーーーーーーーーーーーーーーーーー
+永田？
+Udb4b8b8af526053b4102a45bf9d8be34
+
+U1268683c5ebee57debb1baeb471c36b0
+
+Uc1463205a7987b56d6a3bf9f6869e66a
+
+遠藤
+U86bb3cfff6fa9e95c9076ed94fdae924
